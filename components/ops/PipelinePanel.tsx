@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/simulation";
@@ -86,11 +86,26 @@ export default function PipelinePanel({
     pipelineMutation.mutate();
   }
 
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // The panel grows taller as each agent's card is staggered in (Triage → Resource
+  // → Comms → the Broadcast button). A one-time scroll when the panel first opens
+  // isn't enough — as it grows, the page's total height changes but nothing pulls
+  // the viewport along, so newly-revealed cards can end up off-screen. Re-align on
+  // every stage change so growth never leaves content stranded above or below the fold.
+  useEffect(() => {
+    if (stage === "idle" || stage === "error") return;
+    const t = setTimeout(() => {
+      panelRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 100);
+    return () => clearTimeout(t);
+  }, [stage]);
+
   const agentCard = "glass rounded-xl p-4";
   const agentHeader = "mb-2 flex items-center gap-2 text-xs font-bold tracking-wide";
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass-strong rounded-2xl p-4 sm:p-5">
+    <motion.div ref={panelRef} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass-strong rounded-2xl p-4 sm:p-5">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-xs font-semibold tracking-widest text-electric">AGENTIC RESPONSE PIPELINE</div>
