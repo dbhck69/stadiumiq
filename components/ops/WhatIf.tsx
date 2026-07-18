@@ -62,7 +62,7 @@ export default function WhatIf({ state }: { state: SimState }) {
     // Chains 2 sequential Gemini calls server-side (parse scenario, then narrate).
     // retry: 0 for the same reason as the ops pipeline — a timeout means it's
     // genuinely slow, and the example chips / input are right there to retry manually.
-    mutationFn: async (text: string) => fetchJson("/api/whatif", { question: text, state }, 25000),
+    mutationFn: async (text: string) => fetchJson<WhatIfResponse>("/api/whatif", { question: text, state }, 25000),
     retry: 0,
     onSuccess: (data) => setResult(data),
     // on error: keep result null; the retry button remains

@@ -14,6 +14,12 @@ interface Message {
   fallback?: boolean;
 }
 
+interface ChatResponse {
+  reply: string;
+  fallback?: boolean;
+  map?: string | null;
+}
+
 const SUGGESTIONS = [
   { icon: "🎫", title: "Find my gate", text: "My ticket says section 214 — which gate do I use?" },
   { icon: "🍔", title: "Food near me", text: "Where can I get halal food near section 108?" },
@@ -53,7 +59,7 @@ export default function ChatPanel({
   const chatMutation = useMutation({
     mutationFn: async ({ message, nextMessages }: { message: string; nextMessages: Message[] }) => {
       const langName = language === "auto" ? "auto" : WORLD_CUP_LANGUAGES.find((l) => l.code === language)?.name;
-      return fetchJson("/api/chat", {
+      return fetchJson<ChatResponse>("/api/chat", {
         message,
         history: nextMessages.slice(-7, -1).map((m) => ({ role: m.role, text: m.text })),
         language: langName,

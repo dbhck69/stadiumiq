@@ -14,6 +14,11 @@ interface Announcement {
   text: string;
 }
 
+interface BroadcastResponse {
+  announcements: Announcement[];
+  fallback?: boolean;
+}
+
 export default function Broadcast({ prefill }: { prefill?: string }) {
   const [situation, setSituation] = useState(prefill ?? "");
   const [selected, setSelected] = useState<string[]>(BROADCAST_DEFAULTS);
@@ -37,7 +42,7 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
     // Composing up to 24 languages in one JSON-mode call can genuinely take a while.
     // retry: 0 — a timeout here means the call is genuinely slow, not a network blip;
     // the Compose button is right there to try again instead of auto-doubling the wait.
-    mutationFn: async () => fetchJson("/api/broadcast", { situation, languageCodes: selected }, 25000),
+    mutationFn: async () => fetchJson<BroadcastResponse>("/api/broadcast", { situation, languageCodes: selected }, 25000),
     retry: 0,
     onSuccess: (data) => {
       setAnnouncements(data.announcements ?? []);

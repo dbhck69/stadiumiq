@@ -25,6 +25,11 @@ interface Comms {
   signageUpdate: string | null;
   tone: string;
 }
+interface PipelineResponse {
+  triage: Triage;
+  resource: Resource;
+  comms: Comms;
+}
 
 const SEVERITY_STYLE: Record<Triage["severity"], string> = {
   low: "bg-pitch/15 text-pitch border-pitch/40",
@@ -58,7 +63,7 @@ export default function PipelinePanel({
     // blip — retrying the identical slow call would just multiply the wait; the
     // panel already has a visible manual Retry button for the user to use instead.
     mutationFn: async () =>
-      fetchJson(
+      fetchJson<PipelineResponse>(
         "/api/ops",
         { action: "pipeline", incident: `[${incident.type}] at sector ${incident.sector}: ${incident.description}`, liveState },
         25000

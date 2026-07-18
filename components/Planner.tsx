@@ -14,6 +14,11 @@ interface Plan {
   accessibilityNote: string | null;
 }
 
+interface PlannerResponse {
+  plan: Plan;
+  fallback: boolean;
+}
+
 const INTERESTS = ["🍔 Food & drinks", "🛍️ Official merch", "♿ Accessible routes", "🙏 Prayer room", "📸 Photo spots", "🚆 Public transit", "🌱 Lowest-carbon options"];
 
 export default function Planner() {
@@ -31,7 +36,7 @@ export default function Planner() {
   const planMutation = useMutation({
     mutationFn: async () => {
       const langName = language === "auto" ? undefined : WORLD_CUP_LANGUAGES.find((l) => l.code === language)?.name;
-      return fetchJson("/api/planner", {
+      return fetchJson<PlannerResponse>("/api/planner", {
         section,
         arrival,
         interests: interests.map((i) => i.replace(/^\S+\s/, "")),
