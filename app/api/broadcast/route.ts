@@ -2,21 +2,17 @@ import { NextResponse } from "next/server";
 import { broadcastPrompt } from "@/lib/gemini";
 import { generateJson } from "@/lib/ai-utils";
 import { getLanguage } from "@/lib/languages";
-
-interface BroadcastBody {
-  situation: string;
-  languageCodes: string[];
-}
+import { parseBody } from "@/lib/api-validation";
+import { BroadcastBodySchema } from "@/lib/api-schemas";
 
 interface BroadcastOutput {
   announcements: Array<{ code: string; language: string; text: string }>;
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as BroadcastBody;
-  if (!body.situation?.trim() || !body.languageCodes?.length) {
-    return NextResponse.json({ error: "situation and languageCodes are required" }, { status: 400 });
-  }
+  const parsed = await parseBody(request, BroadcastBodySchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.data;
 
   const languages = body.languageCodes
     .map((code) => getLanguage(code))

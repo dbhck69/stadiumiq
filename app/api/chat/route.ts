@@ -2,13 +2,8 @@ import { NextResponse } from "next/server";
 import { fanSystemPrompt } from "@/lib/gemini";
 import { generateText } from "@/lib/ai-utils";
 import { AMENITIES, GATES } from "@/lib/stadium-data";
-
-interface ChatBody {
-  message: string;
-  history?: Array<{ role: "user" | "assistant"; text: string }>;
-  language?: string; // "auto" or a language name
-  simpleLanguage?: boolean;
-}
+import { parseBody } from "@/lib/api-validation";
+import { ChatBodySchema } from "@/lib/api-schemas";
 
 /** Keyword fallback when the AI is unreachable — the demo never dead-ends. */
 function fallbackAnswer(message: string): { reply: string; map?: string } {
@@ -33,10 +28,9 @@ function fallbackAnswer(message: string): { reply: string; map?: string } {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as ChatBody;
-  if (!body.message?.trim()) {
-    return NextResponse.json({ error: "message is required" }, { status: 400 });
-  }
+  const parsed = await parseBody(request, ChatBodySchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.data;
 
   const historyText = (body.history ?? [])
     .slice(-6)

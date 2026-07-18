@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
 import { triageAgentPrompt, resourceAgentPrompt, commsAgentPrompt, opsQaPrompt } from "@/lib/gemini";
 import { generateJson, generateText } from "@/lib/ai-utils";
-
-interface OpsBody {
-  action: "pipeline" | "qa";
-  incident?: string; // for pipeline
-  question?: string; // for qa
-  liveState: string; // stateSummary() from the client simulation
-}
+import { parseBody } from "@/lib/api-validation";
+import { OpsBodySchema } from "@/lib/api-schemas";
 
 export interface TriageOutput {
   severity: "low" | "medium" | "high" | "critical";
@@ -31,10 +26,12 @@ export interface CommsOutput {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as OpsBody;
+  const parsed = await parseBody(request, OpsBodySchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.data;
 
   if (body.action === "qa") {
-    if (!body.question?.trim()) return NextResponse.json({ error: "question is required" }, { status: 400 });
+    if (!body.question) return NextResponse.json({ error: "question is required" }, { status: 400 });
     const result = await generateText(opsQaPrompt(body.question, body.liveState));
     if (!result.ok) {
       return NextResponse.json({
@@ -46,7 +43,7 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "pipeline") {
-    if (!body.incident?.trim()) return NextResponse.json({ error: "incident is required" }, { status: 400 });
+    if (!body.incident) return NextResponse.json({ error: "incident is required" }, { status: 400 });
 
     // Agent 1 — Triage
     const triage = await generateJson<TriageOutput>(triageAgentPrompt(body.incident, body.liveState));

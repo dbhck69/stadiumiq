@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { scenarioParsePrompt, scenarioNarratePrompt } from "@/lib/gemini";
 import { generateJson } from "@/lib/ai-utils";
-import { runScenario, type SimState, type ScenarioParams } from "@/lib/simulation";
-
-interface WhatIfBody {
-  question: string;
-  state: SimState; // current client-side sim state
-}
+import { runScenario, type ScenarioParams } from "@/lib/simulation";
+import { parseBody } from "@/lib/api-validation";
+import { WhatIfBodySchema } from "@/lib/api-schemas";
 
 interface ParsedScenario extends ScenarioParams {
   horizonMinutes: number;
@@ -26,10 +23,9 @@ function summarizeResult(r: ReturnType<typeof runScenario>): string {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as WhatIfBody;
-  if (!body.question?.trim() || !body.state) {
-    return NextResponse.json({ error: "question and state are required" }, { status: 400 });
-  }
+  const parsedBody = await parseBody(request, WhatIfBodySchema);
+  if (!parsedBody.ok) return parsedBody.response;
+  const body = parsedBody.data;
 
   // Step 1 — AI translates the natural-language scenario into sim parameters.
   const parsed = await generateJson<ParsedScenario>(scenarioParsePrompt(body.question));

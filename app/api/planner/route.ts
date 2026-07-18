@@ -2,13 +2,8 @@ import { NextResponse } from "next/server";
 import { plannerPrompt } from "@/lib/gemini";
 import { generateJson } from "@/lib/ai-utils";
 import { GATES } from "@/lib/stadium-data";
-
-interface PlannerBody {
-  section: string;
-  arrival: string;
-  interests: string[];
-  language?: string;
-}
+import { parseBody } from "@/lib/api-validation";
+import { PlannerBodySchema } from "@/lib/api-schemas";
 
 interface PlanOutput {
   gate: string;
@@ -31,10 +26,9 @@ function gateForSection(section: string): string {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as PlannerBody;
-  if (!body.section?.trim() || !body.arrival?.trim()) {
-    return NextResponse.json({ error: "section and arrival are required" }, { status: 400 });
-  }
+  const parsed = await parseBody(request, PlannerBodySchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.data;
 
   const result = await generateJson<PlanOutput>(
     plannerPrompt({ section: body.section, arrival: body.arrival, interests: body.interests ?? [], language: body.language })
