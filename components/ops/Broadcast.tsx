@@ -77,7 +77,7 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
           <span className="text-xs text-white/60">Languages ({selected.length} selected)</span>
           <div className="flex gap-2 text-[11px]">
             <button onClick={() => setSelected(WORLD_CUP_LANGUAGES.map((l) => l.code))} className="text-gold hover:underline">
-              All 36
+              All 24
             </button>
             <button onClick={() => setSelected(BROADCAST_DEFAULTS)} className="text-white/50 hover:underline">
               Core 6

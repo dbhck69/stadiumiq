@@ -35,7 +35,7 @@ Today those two worlds run on static signage, one-language PA announcements, and
 | Chat **or speak** in any language — AI detects it and answers in kind | Live sector heatmap fed by a crowd **digital twin** |
 | Venue-grounded answers (gates, food, prayer rooms, first aid) with **live map highlighting** | **Agentic incident pipeline**: 3 AI agents triage → allocate staff → draft comms |
 | Accessibility-first: easy-read mode, high-contrast, wheelchair routes, sensory room info | **What-If simulator**: "close Gate B?" → twin re-runs the matchday, AI compares timelines |
-| Personal **AI matchday planner** with the greenest route home | **One-click emergency broadcast in 36 languages** with voice playback |
+| Personal **AI matchday planner** with the greenest route home | **One-click emergency broadcast in 24 languages** with voice playback |
 
 ## What makes this different
 
@@ -45,7 +45,7 @@ Most GenAI stadium concepts are a chatbot with a system prompt. StadiumIQ uses G
 
 2. **🔮 What-If Digital Twin — counterfactuals, not chat.** The operator asks a natural-language question ("What if we hold upper sectors 15 minutes at full time?"). Gemini translates it into simulation parameters, a **deterministic crowd engine re-runs the matchday twice** (baseline vs. scenario), and Gemini narrates the numeric comparison with a safe / caution / unsafe verdict and mitigations. The AI never invents the numbers — the simulation produces them.
 
-3. **📢 36-language emergency broadcast.** One click composes a calm, panic-safe announcement in the languages of all 48 qualified nations — in a single AI call — with per-language browser text-to-speech and RTL rendering for Arabic and Persian.
+3. **📢 24-language emergency broadcast.** One click composes a calm, panic-safe announcement in the languages of all 48 qualified nations — in a single AI call — with per-language browser text-to-speech and RTL rendering for Arabic and Persian.
 
 4. **🎙️ Voice in any language.** In a 70 dB stadium, typing fails. Fans speak to the assistant (Web Speech API) and hear the answer back in their language.
 
@@ -60,7 +60,7 @@ Most GenAI stadium concepts are a chatbot with a system prompt. StadiumIQ uses G
 | Accessibility | Easy-read mode, high-contrast toggle, wheelchair routes, sensory room, ARIA labels, voice I/O |
 | Transportation | Rail/bus/rideshare/parking guidance with post-match queue intelligence |
 | Sustainability | Greenest-route-home in every matchday plan; zero-waste venue guidance |
-| Multilingual assistance | Auto-detect chat in 100+ languages, 36-language broadcast, voice replies |
+| Multilingual assistance | Auto-detect chat in 100+ languages, 24-language broadcast, voice replies |
 | Operational intelligence | Live-state-aware Ops Q&A, KPI tiles, incident lifecycle tracking |
 | Real-time decision support | Agentic pipeline recommendations, digital-twin verdicts with mitigations |
 
@@ -69,7 +69,7 @@ Most GenAI stadium concepts are a chatbot with a system prompt. StadiumIQ uses G
 - **Multilingual grounded chat** — Gemini receives the full venue knowledge base as context plus strict grounding rules; it detects the fan's language and embeds a `[MAP:x]` directive the UI parses to highlight the destination.
 - **Sequential multi-agent orchestration** — three Gemini calls with role-specific prompts (`triageAgent → resourceAgent → commsAgent`), each consuming the prior agent's JSON output plus a live serialization of the simulation state. JSON mode + schema-shaped prompts keep outputs machine-readable.
 - **NL → simulation parameters → NL** — the what-if flow uses Gemini as a *translator* on both ends of a deterministic engine: natural language in, structured `ScenarioParams` out; numeric results in, verdict + mitigations out. AI reasons, the twin computes.
-- **Single-pass mass translation** — one JSON-mode call produces all 36 broadcast languages simultaneously, tone-calibrated to avoid panic language.
+- **Single-pass mass translation** — one JSON-mode call produces all 24 broadcast languages simultaneously, tone-calibrated to avoid panic language.
 - **Graceful degradation everywhere** — every API route has a knowledge-base fallback, so the product keeps working (clearly labeled) if the AI is unreachable or rate-limited.
 
 ## Architecture
@@ -131,7 +131,7 @@ lib/
   stadium-data.ts     venue knowledge base + staff roster (AI grounding source)
   simulation.ts       deterministic digital-twin engine + scenario runner
   gemini.ts           Gemini client + all agent/prompt builders
-  languages.ts        36 languages of the 48 qualified nations (BCP-47 for TTS)
+  languages.ts        24 languages of the 48 qualified nations (BCP-47 for TTS)
 components/           StadiumMap (pure SVG), ChatPanel, Planner, ops/* panels
 hooks/useSimulation.ts  client tick loop with jump-to-halftime/egress demo controls
 ```
@@ -142,7 +142,7 @@ hooks/useSimulation.ts  client tick loop with jump-to-halftime/egress demo contr
 2. **Fan mode** → tap 🎙️ and *speak* in your language; toggle **Easy-read** for simplified answers.
 3. **Ops mode** → click any incident → **Run 3-agent response** and watch Triage → Resource → Comms hand off.
 4. **Ops mode** → What-If tab → *"What if we close Gate B at halftime?"* → twin verdict with side-by-side curves.
-5. **Ops mode** → Broadcast tab → select **All 36** → play the Arabic announcement (note the RTL rendering).
+5. **Ops mode** → Broadcast tab → select **All 24** → play the Arabic announcement (note the RTL rendering).
 6. Use **⏭ Full time** to jump the simulation to egress and watch sectors drain through open gates.
 
 ## Roadmap

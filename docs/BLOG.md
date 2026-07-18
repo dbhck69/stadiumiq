@@ -36,7 +36,7 @@ Three narrow prompts chained through JSON beat one mega-prompt every time I test
 
 Two findings here. First, for fan chat, I stopped specifying languages at all — the prompt says *detect and reply in kind*, and Gemini handles Spanish, Hindi, Arabic, or Swahili without being told which is which. The language picker exists only for fans who want to force an output language.
 
-Second, the **emergency broadcast composer** generates one panic-safe announcement in the languages of all 48 qualified nations — 36 unique languages — in a *single* JSON-mode call. One call, not 36. The interesting prompt-engineering detail was tone: explicitly banning the words "emergency" and "danger" (unless evacuating) and demanding the text read natural to native speakers, not machine-translated. Browser `speechSynthesis` handles playback per BCP-47 code, and Arabic/Persian render RTL.
+Second, the **emergency broadcast composer** generates one panic-safe announcement in the languages of all 48 qualified nations — 24 unique languages — in a *single* JSON-mode call. One call, not 24. The interesting prompt-engineering detail was tone: explicitly banning the words "emergency" and "danger" (unless evacuating) and demanding the text read natural to native speakers, not machine-translated. Browser `speechSynthesis` handles playback per BCP-47 code, and Arabic/Persian render RTL.
 
 ## Rule 4: Grounding needs a feedback channel to the UI
 

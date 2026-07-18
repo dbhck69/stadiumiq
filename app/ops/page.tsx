@@ -19,7 +19,7 @@ type Tab = "live" | "whatif" | "broadcast";
 const TABS: Array<{ id: Tab; label: string; desc: string }> = [
   { id: "live", label: "📡 Live Operations", desc: "Heatmap, incidents & AI copilot" },
   { id: "whatif", label: "🔮 What-If Twin", desc: "Test decisions before you commit" },
-  { id: "broadcast", label: "📢 Broadcast", desc: "One click, 36 languages" },
+  { id: "broadcast", label: "📢 Broadcast", desc: "One click, 24 languages" },
 ];
 
 export default function OpsPage() {

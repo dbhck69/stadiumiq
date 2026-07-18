@@ -16,7 +16,7 @@ const FEATURES = [
   { icon: "🗣️", title: "Any language, spoken or typed", desc: "Fans chat or talk in 100+ languages — the AI detects and answers in kind, grounded in real venue data." },
   { icon: "🤖", title: "Agentic incident response", desc: "Triage → Resource → Comms: three AI agents hand off live, allocating staff and drafting panic-free messaging." },
   { icon: "🔮", title: "What-If Digital Twin", desc: "\"What if we close Gate B?\" The simulation re-runs the matchday and the AI compares both timelines." },
-  { icon: "📢", title: "36-language emergency broadcast", desc: "One click composes a calm PA announcement in the languages of all 48 qualified nations — with voice playback." },
+  { icon: "📢", title: "24-language emergency broadcast", desc: "One click composes a calm PA announcement in the languages of all 48 qualified nations — with voice playback." },
   { icon: "🗺️", title: "Live crowd heatmap", desc: "Eight sectors, five gates, simulated sensor telemetry — congestion pulses red before it becomes a problem." },
   { icon: "🌱", title: "Personal matchday planner", desc: "AI builds each fan a timeline: right gate, low-queue food windows, and the greenest route home." },
 ];
@@ -55,7 +55,7 @@ export default function Home() {
             <motion.div variants={fadeUp} initial="hidden" animate="show" custom={3} className="mt-7 grid grid-cols-3 gap-3 sm:max-w-md">
               {[
                 { label: "FANS INSIDE", node: <CountUp value={sim.state.totalInside} className="text-lg font-bold sm:text-xl" /> },
-                { label: "LANGUAGES", node: <span className="text-lg font-bold sm:text-xl">36+</span> },
+                { label: "LANGUAGES", node: <span className="text-lg font-bold sm:text-xl">24</span> },
                 { label: "AI AGENTS", node: <span className="text-lg font-bold sm:text-xl">3</span> },
               ].map((s) => (
                 <div key={s.label} className="glass rounded-xl px-3 py-2.5 text-center">

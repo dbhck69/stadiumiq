@@ -227,7 +227,7 @@ export default function PipelinePanel({
                 onClick={() => onBroadcast(`[${incident.type}] at sector ${incident.sector}: ${incident.description}`)}
                 className="rounded-full border border-gold/40 bg-gold/10 px-4 py-2 text-xs font-semibold text-gold transition hover:bg-gold/20"
               >
-                📢 Broadcast in 36 languages →
+                📢 Broadcast in 24 languages →
               </button>
               <button onClick={run} className="rounded-full border border-white/15 px-4 py-2 text-xs text-white/60 hover:text-white">
                 ↻ Re-run pipeline
