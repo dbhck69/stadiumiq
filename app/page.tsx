@@ -105,7 +105,7 @@ export default function Home() {
           </motion.h2>
           <div className="grid gap-5 md:grid-cols-2">
             <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-              <Link href="/fan" className="gradient-ring card-hover glass group block h-full rounded-3xl p-6 sm:p-8">
+              <Link href="/fan" data-tour="mode-card-fan" className="gradient-ring card-hover glass group block h-full rounded-3xl p-6 sm:p-8">
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pitch/15 text-3xl transition-transform group-hover:scale-110 group-hover:rotate-6">🙋</div>
                 <h3 className="font-[family-name:var(--font-display)] text-xl font-bold sm:text-2xl">I&apos;m a Fan</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white/60">
@@ -123,7 +123,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-              <Link href="/ops" className="gradient-ring card-hover glass group block h-full rounded-3xl p-6 sm:p-8">
+              <Link href="/ops" data-tour="mode-card-ops" className="gradient-ring card-hover glass group block h-full rounded-3xl p-6 sm:p-8">
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-electric/15 text-3xl transition-transform group-hover:scale-110 group-hover:-rotate-6">🎛️</div>
                 <h3 className="font-[family-name:var(--font-display)] text-xl font-bold sm:text-2xl">Stadium Operations</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white/60">

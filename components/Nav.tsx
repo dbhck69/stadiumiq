@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTour } from "@/components/Tour";
 
 const LINKS = [
   { href: "/", label: "Home", short: "🏠", icon: "🏠" },
@@ -15,6 +16,7 @@ const HC_STORAGE_KEY = "stadiumiq_high_contrast";
 export default function Nav() {
   const pathname = usePathname();
   const [hc, setHc] = useState(false);
+  const { start: startTour, hasSteps: hasTour } = useTour();
 
   // Restore the saved preference once on mount (survives full page reloads,
   // not just client-side navigation).
@@ -57,6 +59,16 @@ export default function Nav() {
               <span className="hidden sm:inline">{l.label}</span>
             </Link>
           ))}
+          {hasTour && (
+            <button
+              onClick={startTour}
+              aria-label="Replay the guided tour for this page"
+              title="Guided tour for this page"
+              className="btn-press ml-0.5 shrink-0 rounded-full border border-white/15 px-2 py-1.5 text-[10px] text-white/65 transition hover:bg-white/10 hover:text-white sm:px-2.5 sm:text-xs"
+            >
+              ❔ Guide
+            </button>
+          )}
           <button
             onClick={() => setHc((v) => !v)}
             aria-pressed={hc}

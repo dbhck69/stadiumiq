@@ -28,7 +28,7 @@ export default function IncidentFeed({
   onSelect: (incident: Incident) => void;
 }) {
   return (
-    <div className="glass flex h-full flex-col rounded-2xl">
+    <div data-tour="ops-incident-feed" className="glass flex h-full flex-col rounded-2xl">
       <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
         <span className="text-xs font-semibold tracking-widest text-white/70">INCIDENT FEED</span>
         <span className="text-[10px] text-white/40">{incidents.filter((i) => i.status !== "resolved").length} active</span>

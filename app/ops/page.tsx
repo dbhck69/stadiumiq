@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import StadiumMap from "@/components/StadiumMap";
 import MatchTicker from "@/components/MatchTicker";
@@ -13,6 +13,7 @@ import Broadcast from "@/components/ops/Broadcast";
 import { useSimulation } from "@/hooks/useSimulation";
 import { stateSummary, type Incident } from "@/lib/simulation";
 import { SECTORS, GATES } from "@/lib/stadium-data";
+import { useTour } from "@/components/Tour";
 
 type Tab = "live" | "whatif" | "broadcast";
 
@@ -28,6 +29,22 @@ export default function OpsPage() {
   const [selected, setSelected] = useState<Incident | null>(null);
   const [broadcastPrefill, setBroadcastPrefill] = useState<string | undefined>();
   const [inspect, setInspect] = useState<{ id: string; kind: "gate" | "sector" } | null>(null);
+  const { active: tourActive, currentStep: tourStep } = useTour();
+  const pipelineRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (tourActive && tourStep?.tab && tourStep.tab !== tab) setTab(tourStep.tab as Tab);
+  }, [tourActive, tourStep, tab]);
+
+  // The pipeline panel opens below a potentially long incident feed — without this,
+  // "pipeline open below" is true but invisible until the user manually scrolls.
+  useEffect(() => {
+    if (!selected) return;
+    const t = setTimeout(() => {
+      pipelineRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+    return () => clearTimeout(t);
+  }, [selected]);
 
   const liveState = stateSummary(sim.state);
 
@@ -103,6 +120,7 @@ export default function OpsPage() {
 
         {/* Guide strip */}
         <motion.div
+          data-tour="ops-guide-strip"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -152,7 +170,7 @@ export default function OpsPage() {
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_1fr]">
                   {/* Heatmap + gates */}
                   <div className="min-w-0 space-y-4">
-                    <div className="glass rounded-2xl p-4">
+                    <div data-tour="ops-heatmap" className="glass rounded-2xl p-4">
                       <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-1">
                         <span className="text-xs font-semibold tracking-widest text-white/70">SECTOR HEATMAP</span>
                         <span className="flex gap-3 text-[10px] text-white/50">
@@ -224,17 +242,19 @@ export default function OpsPage() {
                       selectedId={selected?.id ?? null}
                       onSelect={(inc) => setSelected(inc)}
                     />
-                    <AnimatePresence>
-                      {selected && (
-                        <PipelinePanel
-                          key={selected.id}
-                          incident={selected}
-                          liveState={liveState}
-                          onBroadcast={openBroadcast}
-                          onClose={() => setSelected(null)}
-                        />
-                      )}
-                    </AnimatePresence>
+                    <div ref={pipelineRef}>
+                      <AnimatePresence>
+                        {selected && (
+                          <PipelinePanel
+                            key={selected.id}
+                            incident={selected}
+                            liveState={liveState}
+                            onBroadcast={openBroadcast}
+                            onClose={() => setSelected(null)}
+                          />
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </div>
               </div>

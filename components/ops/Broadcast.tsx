@@ -87,7 +87,7 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
             </button>
           </div>
         </div>
-        <div className="scroll-thin mb-4 flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
+        <div data-tour="ops-broadcast-languages" className="scroll-thin mb-4 flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
           {WORLD_CUP_LANGUAGES.map((l) => (
             <button
               key={l.code}
@@ -103,6 +103,7 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
         </div>
         <button
           onClick={compose}
+          data-tour="ops-broadcast-compose"
           disabled={loading || !situation.trim() || !selected.length}
           className="w-full rounded-full bg-gold py-3 text-sm font-bold text-night shadow-[0_0_24px_rgba(255,194,71,0.35)] transition hover:brightness-110 disabled:opacity-40 disabled:shadow-none"
         >

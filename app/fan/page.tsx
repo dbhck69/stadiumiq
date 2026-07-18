@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import StadiumMap from "@/components/StadiumMap";
 import ChatPanel from "@/components/ChatPanel";
@@ -8,6 +8,7 @@ import Planner from "@/components/Planner";
 import MatchTicker from "@/components/MatchTicker";
 import { useSimulation } from "@/hooks/useSimulation";
 import { VENUE } from "@/lib/stadium-data";
+import { useTour } from "@/components/Tour";
 
 type Tab = "assistant" | "planner";
 
@@ -21,6 +22,11 @@ export default function FanPage() {
   const [tab, setTab] = useState<Tab>("assistant");
   const [highlight, setHighlight] = useState<string | null>(null);
   const [injected, setInjected] = useState<{ text: string; id: number } | null>(null);
+  const { active: tourActive, currentStep: tourStep } = useTour();
+
+  useEffect(() => {
+    if (tourActive && tourStep?.tab && tourStep.tab !== tab) setTab(tourStep.tab as Tab);
+  }, [tourActive, tourStep, tab]);
 
   function onMapSelect(id: string, kind: "gate" | "sector") {
     setHighlight(id);
@@ -74,7 +80,7 @@ export default function FanPage() {
               className="relative grid grid-cols-1 gap-4 lg:grid-cols-[1fr_420px]"
             >
               <ChatPanel onMapHighlight={setHighlight} injected={injected} />
-              <div className="glass h-fit min-w-0 rounded-2xl p-4">
+              <div data-tour="fan-stadium-map" className="glass h-fit min-w-0 rounded-2xl p-4">
                 <div className="mb-2 flex items-center justify-between px-1">
                   <span className="text-xs font-semibold tracking-widest text-white/70">STADIUM MAP</span>
                   <AnimatePresence>

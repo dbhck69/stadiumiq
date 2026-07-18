@@ -184,7 +184,7 @@ export default function ChatPanel({
             <p className="mb-5 text-center text-sm text-white/50">
               Ask me anything about the stadium — in <span className="text-pitch">your</span> language. Or tap a card:
             </p>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            <div data-tour="fan-suggestions" className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
               {SUGGESTIONS.map((s, i) => (
                 <motion.button
                   key={s.title}
@@ -279,6 +279,7 @@ export default function ChatPanel({
       >
         <button
           type="button"
+          data-tour="fan-mic-button"
           onClick={toggleMic}
           disabled={!speechSupported}
           aria-label={listening ? "Stop listening" : "Speak your question"}
@@ -296,6 +297,7 @@ export default function ChatPanel({
         </button>
         <input
           value={input}
+          data-tour="fan-chat-input"
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask in any language…"
           aria-label="Your question"
