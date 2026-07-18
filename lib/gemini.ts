@@ -5,23 +5,25 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { knowledgeBaseText, STAFF_ROSTER, VENUE } from "./stadium-data";
+import { withKeyRotation } from "./gemini-keys";
 
 const MODEL = process.env.GEMINI_MODEL ?? "gemini-flash-latest";
 
-export function getModel(json = false) {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error("GEMINI_API_KEY is not set");
-  const genAI = new GoogleGenerativeAI(key);
+function getModel(apiKey: string, json: boolean) {
+  const genAI = new GoogleGenerativeAI(apiKey);
   return genAI.getGenerativeModel({
     model: MODEL,
     generationConfig: json ? { responseMimeType: "application/json" } : undefined,
   });
 }
 
+/** Generates content, automatically rotating to the next configured API key if the current one is rate-limited. */
 export async function generate(prompt: string, json = false): Promise<string> {
-  const model = getModel(json);
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+  return withKeyRotation(async (apiKey) => {
+    const model = getModel(apiKey, json);
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  });
 }
 
 /* ------------------------------ Fan assistant ------------------------------ */
