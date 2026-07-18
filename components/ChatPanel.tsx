@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WORLD_CUP_LANGUAGES } from "@/lib/languages";
 import AiText from "@/components/AiText";
+import { speakText, getSpeechRecognitionCtor, describeSpeechError, type SpeechRecognitionLike } from "@/lib/speech";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,17 +20,6 @@ const SUGGESTIONS = [
   { icon: "🚑", title: "First aid", text: "Where is the nearest first aid station?" },
   { icon: "🚆", title: "Way home", text: "What's the fastest way to get back to Manhattan after the match?" },
 ];
-
-/* Minimal typing for the Web Speech API (not in TS DOM lib). */
-interface SpeechRecognitionLike {
-  lang: string;
-  interimResults: boolean;
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
-  onend: (() => void) | null;
-  onerror: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-}
 
 export default function ChatPanel({
   onMapHighlight,
@@ -47,13 +37,13 @@ export default function ChatPanel({
   const [listening, setListening] = useState(false);
   const [voiceReply, setVoiceReply] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
+  const [voiceNote, setVoiceNote] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const lastInjectedId = useRef(0);
 
   useEffect(() => {
-    const w = window as unknown as Record<string, unknown>;
-    setSpeechSupported(Boolean(w.SpeechRecognition || w.webkitSpeechRecognition));
+    setSpeechSupported(Boolean(getSpeechRecognitionCtor()));
   }, []);
 
   useEffect(() => {
@@ -69,11 +59,10 @@ export default function ChatPanel({
   }, [injected]);
 
   function speak(text: string) {
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text.replace(/[*_#]/g, ""));
-    if (language !== "auto") utter.lang = language;
-    window.speechSynthesis.speak(utter);
+    speakText(text, {
+      lang: language,
+      onError: (reason) => setVoiceNote(reason),
+    });
   }
 
   async function send(text: string) {
@@ -111,9 +100,12 @@ export default function ChatPanel({
       recognitionRef.current?.stop();
       return;
     }
-    const w = window as unknown as Record<string, unknown>;
-    const Ctor = (w.SpeechRecognition || w.webkitSpeechRecognition) as (new () => SpeechRecognitionLike) | undefined;
-    if (!Ctor) return;
+    const Ctor = getSpeechRecognitionCtor();
+    if (!Ctor) {
+      setVoiceNote("Voice input isn't supported in this browser — try Chrome or Edge.");
+      return;
+    }
+    setVoiceNote(null);
     const rec = new Ctor();
     rec.lang = language === "auto" ? navigator.language : language;
     rec.interimResults = false;
@@ -123,7 +115,10 @@ export default function ChatPanel({
       send(transcript);
     };
     rec.onend = () => setListening(false);
-    rec.onerror = () => setListening(false);
+    rec.onerror = (e) => {
+      setListening(false);
+      setVoiceNote(describeSpeechError(e.error));
+    };
     recognitionRef.current = rec;
     setListening(true);
     rec.start();
@@ -266,6 +261,14 @@ export default function ChatPanel({
         </div>
       )}
 
+      {/* Voice status note */}
+      {voiceNote && (
+        <div className="flex items-center justify-between gap-2 border-t border-white/8 bg-warn/8 px-4 py-2 text-[11px] text-warn">
+          <span>⚠ {voiceNote}</span>
+          <button onClick={() => setVoiceNote(null)} aria-label="Dismiss" className="text-warn/70 hover:text-warn">✕</button>
+        </div>
+      )}
+
       {/* Input */}
       <form
         onSubmit={(e) => {
@@ -274,19 +277,23 @@ export default function ChatPanel({
         }}
         className="flex items-center gap-2 border-t border-white/8 p-3"
       >
-        {speechSupported && (
-          <button
-            type="button"
-            onClick={toggleMic}
-            aria-label={listening ? "Stop listening" : "Speak your question"}
-            className={`btn-press relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-lg transition ${
-              listening ? "border-danger bg-danger/20 text-danger" : "border-white/15 bg-white/5 text-white/70 hover:border-cyanx/50 hover:text-cyanx"
-            }`}
-          >
-            {listening && <span className="pulse-ring absolute inset-0 rounded-full border border-danger" />}
-            🎙️
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={toggleMic}
+          disabled={!speechSupported}
+          aria-label={listening ? "Stop listening" : "Speak your question"}
+          title={speechSupported ? "Speak your question" : "Voice input not supported in this browser"}
+          className={`btn-press relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-lg transition ${
+            !speechSupported
+              ? "cursor-not-allowed border-white/8 bg-white/3 text-white/25"
+              : listening
+                ? "border-danger bg-danger/20 text-danger"
+                : "border-white/15 bg-white/5 text-white/70 hover:border-cyanx/50 hover:text-cyanx"
+          }`}
+        >
+          {listening && <span className="pulse-ring absolute inset-0 rounded-full border border-danger" />}
+          🎙️
+        </button>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

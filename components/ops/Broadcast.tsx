@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { WORLD_CUP_LANGUAGES, BROADCAST_DEFAULTS } from "@/lib/languages";
 import AiText from "@/components/AiText";
+import { speakText } from "@/lib/speech";
 
 interface Announcement {
   code: string;
@@ -48,13 +49,12 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
   }
 
   function speak(a: Announcement) {
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(a.text.replace(/[*_#]/g, ""));
-    u.lang = a.code;
-    u.onend = () => setSpeakingCode(null);
     setSpeakingCode(a.code);
-    window.speechSynthesis.speak(u);
+    speakText(a.text, {
+      lang: a.code,
+      onEnd: () => setSpeakingCode(null),
+      onError: () => setSpeakingCode(null),
+    });
   }
 
   return (
