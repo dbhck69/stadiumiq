@@ -14,7 +14,9 @@
 function loadKeys(): string[] {
   const multi = process.env.GEMINI_API_KEYS;
   if (multi && multi.trim()) {
-    return multi.split(",").map((k) => k.trim()).filter(Boolean);
+    // Split on commas OR whitespace/newlines — dashboards make it easy to
+    // paste keys on separate lines, which must not fuse into one giant key.
+    return multi.split(/[\s,]+/).map((k) => k.trim()).filter(Boolean);
   }
   const single = process.env.GEMINI_API_KEY;
   return single ? [single] : [];
@@ -45,10 +47,20 @@ export function isRateLimitError(err: unknown): boolean {
   return /429|RESOURCE_EXHAUSTED|quota/i.test(message);
 }
 
+/** A key that is malformed, revoked, or restricted — dead for every request,
+ * unlike a rate-limited key which recovers. Both warrant trying the next key.
+ * Google reports these variously as 400 API_KEY_INVALID, 401 UNAUTHENTICATED /
+ * ACCESS_TOKEN_TYPE_UNSUPPORTED, or 403 PERMISSION_DENIED. */
+export function isInvalidKeyError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err);
+  return /API key|API_KEY_INVALID|PERMISSION_DENIED|UNAUTHENTICATED|ACCESS_TOKEN_TYPE_UNSUPPORTED|invalid authentication|unauthorized|\b40[13]\b/i.test(message);
+}
+
 /**
- * Runs `fn` with the current key; on a rate-limit error, advances to the
- * next key and retries, up to once per configured key. Throws the last
- * error only once every key has been tried.
+ * Runs `fn` with the current key; on a rate-limit or invalid-key error,
+ * advances to the next key and retries, up to once per configured key.
+ * Throws the last error only once every key has been tried — so one bad
+ * key in the list can never take the whole app down.
  */
 export async function withKeyRotation<T>(fn: (apiKey: string) => Promise<T>): Promise<T> {
   const attempts = Math.max(KEYS.length, 1);
@@ -59,12 +71,12 @@ export async function withKeyRotation<T>(fn: (apiKey: string) => Promise<T>): Pr
       return await fn(key);
     } catch (err) {
       lastError = err;
-      if (isRateLimitError(err) && attempts > 1) {
+      if ((isRateLimitError(err) || isInvalidKeyError(err)) && attempts > 1) {
         advanceKey();
         continue;
       }
       throw err;
     }
   }
-  throw lastError ?? new Error("All Gemini API keys are rate-limited");
+  throw lastError ?? new Error("All Gemini API keys failed (rate-limited or invalid)");
 }
