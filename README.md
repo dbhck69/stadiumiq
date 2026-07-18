@@ -12,7 +12,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-06B6D4?logo=tailwindcss&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-00e07a)
 
-**🔴 Live demo:** _[deployment link — see Submission section]_
+**🔴 Live demo:** [stadiumiq-bice.vercel.app](https://stadiumiq-bice.vercel.app)
 
 *Built for Hack2Skill PromptWars · Challenge 4: Smart Stadiums & Tournament Operations*
 
