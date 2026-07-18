@@ -80,15 +80,36 @@ export default function PipelinePanel({
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass-strong rounded-2xl p-4 sm:p-5">
       <div className="mb-3 flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-semibold tracking-widest text-electric">AGENTIC RESPONSE PIPELINE</div>
           <div className="mt-1 text-sm text-white/80">
             #{incident.id} · {incident.type} @ sector {incident.sector} — {incident.description}
           </div>
         </div>
-        <button onClick={onClose} aria-label="Close pipeline" className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-white/60 hover:text-white">
+        <button onClick={onClose} aria-label="Close pipeline" className="btn-press shrink-0 rounded-full border border-white/15 px-2.5 py-1 text-xs text-white/60 hover:text-white">
           ✕
         </button>
+      </div>
+
+      {/* Stepper */}
+      <div className="mb-4 flex items-center gap-1.5" aria-hidden>
+        {[
+          { n: 1, label: "Triage", on: stage !== "idle" && stage !== "error", color: "bg-pitch text-night" },
+          { n: 2, label: "Resource", on: stage === "resource" || stage === "comms" || stage === "done", color: "bg-cyanx text-night" },
+          { n: 3, label: "Comms", on: stage === "comms" || stage === "done", color: "bg-gold text-night" },
+        ].map((s, i) => (
+          <div key={s.n} className="flex flex-1 items-center gap-1.5">
+            <span
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold transition-all duration-500 ${
+                s.on ? s.color : "bg-white/8 text-white/40"
+              }`}
+            >
+              {s.n}
+            </span>
+            <span className={`text-[10px] font-semibold transition-colors ${s.on ? "text-white/85" : "text-white/35"}`}>{s.label}</span>
+            {i < 2 && <span className={`h-px flex-1 transition-colors duration-500 ${s.on ? "bg-white/30" : "bg-white/8"}`} />}
+          </div>
+        ))}
       </div>
 
       {stage === "idle" && (

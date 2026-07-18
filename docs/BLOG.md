@@ -50,7 +50,7 @@ Free-tier API keys rate-limit at the worst moments (like, say, judging). Every r
 
 ## The stack, briefly
 
-Next.js 16 (App Router) + Tailwind v4 + Framer Motion; five serverless routes wrapping Gemini (`gemini-2.0-flash`, JSON mode) so the key never reaches the browser; zero database; zero image assets — the stadium, heatmap, and comparison charts are all generated SVG. The whole repo is a few hundred kilobytes.
+Next.js 16 (App Router) + Tailwind v4 + Framer Motion; five serverless routes wrapping Gemini (`gemini-flash-latest`, JSON mode) so the key never reaches the browser; zero database; zero image assets — the stadium, heatmap, and comparison charts are all generated SVG. The whole repo is a few hundred kilobytes.
 
 ## What I'd build next
 

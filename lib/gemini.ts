@@ -6,7 +6,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { knowledgeBaseText, STAFF_ROSTER, VENUE } from "./stadium-data";
 
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-flash-latest";
 
 export function getModel(json = false) {
   const key = process.env.GEMINI_API_KEY;

@@ -1,11 +1,12 @@
 "use client";
 
 /**
- * SVG stadium bowl — pure code, no images.
- * Fan mode: highlights a gate/sector destination.
- * Ops mode: paints sectors as an occupancy heatmap.
+ * Interactive SVG stadium bowl — pure code, no images.
+ * Fan mode: highlights a destination; tap any gate/sector to ask about it.
+ * Ops mode: paints sectors as an occupancy heatmap; tap to inspect.
  */
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 const CX = 200;
@@ -42,7 +43,8 @@ const GATE_POS: Record<string, { angle: number; label: string }> = {
 
 function pt(angle: number, r: number): [number, number] {
   const rad = (angle * Math.PI) / 180;
-  return [CX + Math.cos(rad) * r * KX, CY + Math.sin(rad) * r];
+  // Round to 2 decimals so server/client SVG serialization is byte-identical (avoids hydration mismatch).
+  return [Math.round((CX + Math.cos(rad) * r * KX) * 100) / 100, Math.round((CY + Math.sin(rad) * r) * 100) / 100];
 }
 
 function sectorPath(g: SectorGeom): string {
@@ -68,13 +70,18 @@ export interface StadiumMapProps {
   occupancy?: Record<string, number>;
   /** show gate markers */
   showGates?: boolean;
+  /** tap/click handler — makes the map interactive */
+  onSelect?: (id: string, kind: "gate" | "sector") => void;
   className?: string;
 }
 
-export default function StadiumMap({ highlight, occupancy, showGates = true, className }: StadiumMapProps) {
+export default function StadiumMap({ highlight, occupancy, showGates = true, onSelect, className }: StadiumMapProps) {
   const hl = highlight?.toUpperCase() ?? null;
+  const [hover, setHover] = useState<string | null>(null);
+  const interactive = Boolean(onSelect);
+
   return (
-    <svg viewBox="0 0 400 300" className={className} role="img" aria-label="Stadium map">
+    <svg viewBox="0 0 400 300" className={className} role="img" aria-label="Interactive stadium map">
       {/* pitch */}
       <rect x={CX - 52} y={CY - 33} width={104} height={66} rx={6} fill="#0a5c38" stroke="#00e07a55" />
       <rect x={CX - 52} y={CY - 33} width={104} height={66} rx={6} fill="url(#pitchStripes)" opacity={0.5} />
@@ -99,16 +106,25 @@ export default function StadiumMap({ highlight, occupancy, showGates = true, cla
       {SECTOR_GEOMS.map((g) => {
         const pct = occupancy?.[g.id];
         const isHl = hl === g.id;
+        const isHover = hover === g.id;
         const fill = pct !== undefined ? heatColor(pct) : "#1b2946";
         const opacity = pct !== undefined ? 0.28 + (pct / 100) * 0.6 : 1;
         return (
-          <g key={g.id}>
+          <g
+            key={g.id}
+            onClick={onSelect ? () => onSelect(g.id, "sector") : undefined}
+            onMouseEnter={() => setHover(g.id)}
+            onMouseLeave={() => setHover(null)}
+            style={interactive ? { cursor: "pointer" } : undefined}
+            role={interactive ? "button" : undefined}
+            aria-label={interactive ? `Sector ${g.id}${pct !== undefined ? `, ${pct}% full` : ""}` : undefined}
+          >
             <motion.path
               d={sectorPath(g)}
               fill={fill}
-              fillOpacity={isHl ? 0.95 : opacity}
-              stroke={isHl ? "#00e07a" : "#2c3f6b"}
-              strokeWidth={isHl ? 2.5 : 1}
+              fillOpacity={isHl ? 0.95 : isHover && interactive ? Math.min(opacity + 0.25, 1) : opacity}
+              stroke={isHl ? "#00e07a" : isHover && interactive ? "#8ba3d8" : "#2c3f6b"}
+              strokeWidth={isHl ? 2.5 : isHover && interactive ? 2 : 1}
               filter={isHl ? "url(#glow)" : undefined}
               animate={pct !== undefined && pct >= 90 ? { fillOpacity: [opacity, 0.45, opacity] } : undefined}
               transition={pct !== undefined && pct >= 90 ? { repeat: Infinity, duration: 1.4 } : undefined}
@@ -117,9 +133,9 @@ export default function StadiumMap({ highlight, occupancy, showGates = true, cla
               const mid = (g.a0 + g.a1) / 2;
               const [lx, ly] = pt(mid, (g.r0 + g.r1) / 2);
               return (
-                <text x={lx} y={ly + 3} textAnchor="middle" fontSize={9} fill="#e8edf7" opacity={0.85} fontWeight={600}>
+                <text x={lx} y={ly + 3.5} textAnchor="middle" fontSize={10} fill="#eef2fb" opacity={0.95} fontWeight={700} pointerEvents="none">
                   {g.id}
-                  {pct !== undefined ? ` ${pct}%` : ""}
+                  {pct !== undefined ? ` · ${pct}%` : ""}
                 </text>
               );
             })()}
@@ -132,8 +148,17 @@ export default function StadiumMap({ highlight, occupancy, showGates = true, cla
         Object.entries(GATE_POS).map(([id, g]) => {
           const [gx, gy] = pt(g.angle, 124);
           const isHl = hl === id;
+          const isHover = hover === `G${id}`;
           return (
-            <g key={id}>
+            <g
+              key={id}
+              onClick={onSelect ? () => onSelect(id, "gate") : undefined}
+              onMouseEnter={() => setHover(`G${id}`)}
+              onMouseLeave={() => setHover(null)}
+              style={interactive ? { cursor: "pointer" } : undefined}
+              role={interactive ? "button" : undefined}
+              aria-label={interactive ? g.label : undefined}
+            >
               {isHl && (
                 <motion.circle
                   cx={gx}
@@ -146,11 +171,22 @@ export default function StadiumMap({ highlight, occupancy, showGates = true, cla
                   transition={{ repeat: Infinity, duration: 1.4, ease: "easeOut" }}
                 />
               )}
-              <circle cx={gx} cy={gy} r={6} fill={isHl ? "#00e07a" : "#101a30"} stroke={isHl ? "#00e07a" : "#4a5f8f"} strokeWidth={1.5} filter={isHl ? "url(#glow)" : undefined} />
-              <text x={gx} y={gy + 2.8} textAnchor="middle" fontSize={7} fontWeight={700} fill={isHl ? "#05080f" : "#aebada"}>
+              {/* generous invisible touch target */}
+              <circle cx={gx} cy={gy} r={14} fill="transparent" />
+              <circle
+                cx={gx}
+                cy={gy}
+                r={isHover ? 7.5 : 6.5}
+                fill={isHl ? "#00e07a" : isHover ? "#233457" : "#101a30"}
+                stroke={isHl ? "#00e07a" : isHover ? "#8ba3d8" : "#4a5f8f"}
+                strokeWidth={1.5}
+                filter={isHl ? "url(#glow)" : undefined}
+                style={{ transition: "all .15s ease" }}
+              />
+              <text x={gx} y={gy + 3} textAnchor="middle" fontSize={8} fontWeight={700} fill={isHl ? "#05080f" : "#c5d1ee"} pointerEvents="none">
                 {id}
               </text>
-              <text x={gx} y={gy + (gy > CY ? 18 : -12)} textAnchor="middle" fontSize={7.5} fill={isHl ? "#00e07a" : "#7487ad"}>
+              <text x={gx} y={gy + (gy > CY ? 20 : -13)} textAnchor="middle" fontSize={8} fill={isHl ? "#00e07a" : "#8296bd"} pointerEvents="none">
                 {g.label}
               </text>
             </g>
