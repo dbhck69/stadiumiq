@@ -16,7 +16,7 @@ What shipped, in one day of building:
 
 📢 **One-click emergency broadcast in 24 languages** — the languages of all 48 qualified nations, composed in a single AI call, with voice playback and proper RTL for Arabic.
 
-🗣️ **A fan companion that speaks every fan's language** — literally. Type or *talk* in Spanish, Hindi, Swahili — it detects, answers in kind, and lights up your destination on a live stadium map. Easy-read and high-contrast modes built in, because 80,000 fans includes everyone.
+🗣️ **A fan companion that speaks every fan's language** — literally. Type or *talk* in Spanish, Arabic, Japanese — it detects, answers in kind, and lights up your destination on a live stadium map. Easy-read and high-contrast modes built in, because 80,000 fans includes everyone.
 
 🌱 Every personalized matchday plan ends with the greenest route home.
 
