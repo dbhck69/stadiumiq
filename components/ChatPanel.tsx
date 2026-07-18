@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { WORLD_CUP_LANGUAGES } from "@/lib/languages";
 import AiText from "@/components/AiText";
@@ -31,7 +32,6 @@ export default function ChatPanel({
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("auto");
   const [simple, setSimple] = useState(false);
   const [listening, setListening] = useState(false);
@@ -45,6 +45,32 @@ export default function ChatPanel({
   useEffect(() => {
     setSpeechSupported(Boolean(getSpeechRecognitionCtor()));
   }, []);
+
+  const chatMutation = useMutation({
+    mutationFn: async ({ message, nextMessages }: { message: string; nextMessages: Message[] }) => {
+      const langName = language === "auto" ? "auto" : WORLD_CUP_LANGUAGES.find((l) => l.code === language)?.name;
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message,
+          history: nextMessages.slice(-7, -1).map((m) => ({ role: m.role, text: m.text })),
+          language: langName,
+          simpleLanguage: simple,
+        }),
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setMessages((m) => [...m, { role: "assistant", text: data.reply, fallback: data.fallback }]);
+      onMapHighlight(data.map ?? null);
+      if (voiceReply) speak(data.reply);
+    },
+    onError: () => {
+      setMessages((m) => [...m, { role: "assistant", text: "Connection issue — please try again.", fallback: true }]);
+    },
+  });
+  const loading = chatMutation.isPending;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -65,34 +91,13 @@ export default function ChatPanel({
     });
   }
 
-  async function send(text: string) {
+  function send(text: string) {
     const message = text.trim();
     if (!message || loading) return;
     setInput("");
     const nextMessages: Message[] = [...messages, { role: "user" as const, text: message }];
     setMessages(nextMessages);
-    setLoading(true);
-    try {
-      const langName = language === "auto" ? "auto" : WORLD_CUP_LANGUAGES.find((l) => l.code === language)?.name;
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message,
-          history: nextMessages.slice(-7, -1).map((m) => ({ role: m.role, text: m.text })),
-          language: langName,
-          simpleLanguage: simple,
-        }),
-      });
-      const data = await res.json();
-      setMessages((m) => [...m, { role: "assistant", text: data.reply, fallback: data.fallback }]);
-      onMapHighlight(data.map ?? null);
-      if (voiceReply) speak(data.reply);
-    } catch {
-      setMessages((m) => [...m, { role: "assistant", text: "Connection issue — please try again.", fallback: true }]);
-    } finally {
-      setLoading(false);
-    }
+    chatMutation.mutate({ message, nextMessages });
   }
 
   function toggleMic() {

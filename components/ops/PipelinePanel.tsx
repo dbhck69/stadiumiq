@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/simulation";
 import AiText from "@/components/AiText";
@@ -49,18 +50,16 @@ export default function PipelinePanel({
   const [resource, setResource] = useState<Resource | null>(null);
   const [comms, setComms] = useState<Comms | null>(null);
 
-  async function run() {
-    setStage("triage");
-    setTriage(null);
-    setResource(null);
-    setComms(null);
-    try {
+  const pipelineMutation = useMutation({
+    mutationFn: async () => {
       const res = await fetch("/api/ops", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "pipeline", incident: `[${incident.type}] at sector ${incident.sector}: ${incident.description}`, liveState }),
       });
-      const data = await res.json();
+      return res.json();
+    },
+    onSuccess: async (data) => {
       // Stagger the reveal so the agent handoff is visible.
       setTriage(data.triage);
       setStage("resource");
@@ -70,9 +69,16 @@ export default function PipelinePanel({
       await new Promise((r) => setTimeout(r, 900));
       setComms(data.comms);
       setStage("done");
-    } catch {
-      setStage("error");
-    }
+    },
+    onError: () => setStage("error"),
+  });
+
+  function run() {
+    setStage("triage");
+    setTriage(null);
+    setResource(null);
+    setComms(null);
+    pipelineMutation.mutate();
   }
 
   const agentCard = "glass rounded-xl p-4";

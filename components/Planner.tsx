@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { WORLD_CUP_LANGUAGES } from "@/lib/languages";
 import AiText from "@/components/AiText";
@@ -21,31 +22,33 @@ export default function Planner() {
   const [language, setLanguage] = useState("auto");
   const [plan, setPlan] = useState<Plan | null>(null);
   const [fallback, setFallback] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   function toggleInterest(i: string) {
     setInterests((v) => (v.includes(i) ? v.filter((x) => x !== i) : [...v, i]));
   }
 
-  async function generate() {
-    if (!section.trim() || loading) return;
-    setLoading(true);
-    setPlan(null);
-    try {
+  const planMutation = useMutation({
+    mutationFn: async () => {
       const langName = language === "auto" ? undefined : WORLD_CUP_LANGUAGES.find((l) => l.code === language)?.name;
       const res = await fetch("/api/planner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ section, arrival, interests: interests.map((i) => i.replace(/^\S+\s/, "")), language: langName }),
       });
-      const data = await res.json();
+      return res.json();
+    },
+    onSuccess: (data) => {
       setPlan(data.plan);
       setFallback(Boolean(data.fallback));
-    } catch {
-      setFallback(true);
-    } finally {
-      setLoading(false);
-    }
+    },
+    onError: () => setFallback(true),
+  });
+  const loading = planMutation.isPending;
+
+  function generate() {
+    if (!section.trim() || loading) return;
+    setPlan(null);
+    planMutation.mutate();
   }
 
   return (

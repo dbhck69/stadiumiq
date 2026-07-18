@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import type { SimState } from "@/lib/simulation";
 import AiText from "@/components/AiText";
@@ -55,25 +56,26 @@ function Sparkline({ result, color }: { result: ScenarioResult; color: string })
 export default function WhatIf({ state }: { state: SimState }) {
   const [question, setQuestion] = useState("");
   const [result, setResult] = useState<WhatIfResponse | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  async function run(q: string) {
-    const text = q.trim();
-    if (!text || loading) return;
-    setLoading(true);
-    setResult(null);
-    try {
+  const whatIfMutation = useMutation({
+    mutationFn: async (text: string) => {
       const res = await fetch("/api/whatif", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: text, state }),
       });
-      setResult(await res.json());
-    } catch {
-      // keep result null; the retry button remains
-    } finally {
-      setLoading(false);
-    }
+      return res.json();
+    },
+    onSuccess: (data) => setResult(data),
+    // on error: keep result null; the retry button remains
+  });
+  const loading = whatIfMutation.isPending;
+
+  function run(q: string) {
+    const text = q.trim();
+    if (!text || loading) return;
+    setResult(null);
+    whatIfMutation.mutate(text);
   }
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { WORLD_CUP_LANGUAGES, BROADCAST_DEFAULTS } from "@/lib/languages";
 import AiText from "@/components/AiText";
@@ -17,7 +18,6 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
   const [selected, setSelected] = useState<string[]>(BROADCAST_DEFAULTS);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [fallback, setFallback] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [speakingCode, setSpeakingCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,24 +28,27 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
     setSelected((s) => (s.includes(code) ? s.filter((c) => c !== code) : [...s, code]));
   }
 
-  async function compose() {
-    if (!situation.trim() || !selected.length || loading) return;
-    setLoading(true);
-    setAnnouncements([]);
-    try {
+  const composeMutation = useMutation({
+    mutationFn: async () => {
       const res = await fetch("/api/broadcast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ situation, languageCodes: selected }),
       });
-      const data = await res.json();
+      return res.json();
+    },
+    onSuccess: (data) => {
       setAnnouncements(data.announcements ?? []);
       setFallback(Boolean(data.fallback));
-    } catch {
-      setFallback(true);
-    } finally {
-      setLoading(false);
-    }
+    },
+    onError: () => setFallback(true),
+  });
+  const loading = composeMutation.isPending;
+
+  function compose() {
+    if (!situation.trim() || !selected.length || loading) return;
+    setAnnouncements([]);
+    composeMutation.mutate();
   }
 
   function speak(a: Announcement) {

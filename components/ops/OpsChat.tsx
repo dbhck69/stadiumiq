@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import AiText from "@/components/AiText";
 
@@ -13,26 +14,30 @@ const SUGGESTIONS = [
 export default function OpsChat({ liveState }: { liveState: string }) {
   const [question, setQuestion] = useState("");
   const [exchanges, setExchanges] = useState<Array<{ q: string; a: string; fallback?: boolean }>>([]);
-  const [loading, setLoading] = useState(false);
 
-  async function ask(q: string) {
-    const text = q.trim();
-    if (!text || loading) return;
-    setQuestion("");
-    setLoading(true);
-    try {
+  const askMutation = useMutation({
+    mutationFn: async (text: string) => {
       const res = await fetch("/api/ops", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "qa", question: text, liveState }),
       });
-      const data = await res.json();
+      return res.json() as Promise<{ answer: string; fallback?: boolean }>;
+    },
+    onSuccess: (data, text) => {
       setExchanges((e) => [{ q: text, a: data.answer, fallback: data.fallback }, ...e].slice(0, 4));
-    } catch {
+    },
+    onError: (_err, text) => {
       setExchanges((e) => [{ q: text, a: "Connection issue — try again.", fallback: true }, ...e].slice(0, 4));
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+  const loading = askMutation.isPending;
+
+  function ask(q: string) {
+    const text = q.trim();
+    if (!text || loading) return;
+    setQuestion("");
+    askMutation.mutate(text);
   }
 
   return (
