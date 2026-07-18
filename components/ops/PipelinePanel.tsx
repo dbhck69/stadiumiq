@@ -145,6 +145,11 @@ export default function PipelinePanel({
               TRIAGE AGENT
               {!triage && <span className="shimmer ml-2 h-3 w-24 rounded bg-white/10" />}
             </div>
+            {!triage && (
+              <p className="text-xs text-white/40">
+                Running all 3 agents on real AI calls — this can take up to ~20 seconds. Hang tight.
+              </p>
+            )}
             {triage && (
               <div className="space-y-2 text-sm">
                 <div className="flex flex-wrap items-center gap-2">

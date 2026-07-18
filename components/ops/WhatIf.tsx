@@ -123,7 +123,7 @@ export default function WhatIf({ state }: { state: SimState }) {
 
       {loading && (
         <div className="glass rounded-2xl p-5">
-          <div className="mb-3 text-xs text-white/50">Running both timelines through the digital twin…</div>
+          <div className="mb-3 text-xs text-white/50">Running both timelines through the digital twin — this can take up to ~15 seconds.</div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="shimmer h-28 rounded-xl bg-white/5" />
             <div className="shimmer h-28 rounded-xl bg-white/5" />

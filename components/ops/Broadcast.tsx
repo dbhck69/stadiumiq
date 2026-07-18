@@ -113,10 +113,13 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
       </div>
 
       {loading && (
-        <div className="grid gap-2 sm:grid-cols-2">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="shimmer h-20 rounded-xl bg-white/5" />
-          ))}
+        <div>
+          <p className="mb-2 text-xs text-white/40">Composing {selected.length} languages in one AI call — this can take up to ~20 seconds.</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="shimmer h-20 rounded-xl bg-white/5" />
+            ))}
+          </div>
         </div>
       )}
 
