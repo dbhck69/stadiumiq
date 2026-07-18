@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { WORLD_CUP_LANGUAGES } from "@/lib/languages";
 import AiText from "@/components/AiText";
+import { fetchJson } from "@/lib/fetch-json";
 
 interface Plan {
   gate: string;
@@ -30,12 +31,12 @@ export default function Planner() {
   const planMutation = useMutation({
     mutationFn: async () => {
       const langName = language === "auto" ? undefined : WORLD_CUP_LANGUAGES.find((l) => l.code === language)?.name;
-      const res = await fetch("/api/planner", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ section, arrival, interests: interests.map((i) => i.replace(/^\S+\s/, "")), language: langName }),
+      return fetchJson("/api/planner", {
+        section,
+        arrival,
+        interests: interests.map((i) => i.replace(/^\S+\s/, "")),
+        language: langName,
       });
-      return res.json();
     },
     onSuccess: (data) => {
       setPlan(data.plan);

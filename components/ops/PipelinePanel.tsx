@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/simulation";
 import AiText from "@/components/AiText";
+import { fetchJson } from "@/lib/fetch-json";
 
 interface Triage {
   severity: "low" | "medium" | "high" | "critical";
@@ -51,14 +52,18 @@ export default function PipelinePanel({
   const [comms, setComms] = useState<Comms | null>(null);
 
   const pipelineMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/ops", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "pipeline", incident: `[${incident.type}] at sector ${incident.sector}: ${incident.description}`, liveState }),
-      });
-      return res.json();
-    },
+    // This one chains 3 sequential Gemini calls server-side (Triage → Resource →
+    // Comms), so it gets a longer budget than a single call. retry: 0 because a
+    // timeout here means the backend is genuinely slow/stuck, not a quick network
+    // blip — retrying the identical slow call would just multiply the wait; the
+    // panel already has a visible manual Retry button for the user to use instead.
+    mutationFn: async () =>
+      fetchJson(
+        "/api/ops",
+        { action: "pipeline", incident: `[${incident.type}] at sector ${incident.sector}: ${incident.description}`, liveState },
+        25000
+      ),
+    retry: 0,
     onSuccess: async (data) => {
       // Stagger the reveal so the agent handoff is visible.
       setTriage(data.triage);

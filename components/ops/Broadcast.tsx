@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { WORLD_CUP_LANGUAGES, BROADCAST_DEFAULTS } from "@/lib/languages";
 import AiText from "@/components/AiText";
 import { speakText } from "@/lib/speech";
+import { fetchJson } from "@/lib/fetch-json";
 
 interface Announcement {
   code: string;
@@ -29,14 +30,11 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
   }
 
   const composeMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/broadcast", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ situation, languageCodes: selected }),
-      });
-      return res.json();
-    },
+    // Composing up to 24 languages in one JSON-mode call can genuinely take a while.
+    // retry: 0 — a timeout here means the call is genuinely slow, not a network blip;
+    // the Compose button is right there to try again instead of auto-doubling the wait.
+    mutationFn: async () => fetchJson("/api/broadcast", { situation, languageCodes: selected }, 25000),
+    retry: 0,
     onSuccess: (data) => {
       setAnnouncements(data.announcements ?? []);
       setFallback(Boolean(data.fallback));

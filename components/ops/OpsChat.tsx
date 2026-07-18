@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import AiText from "@/components/AiText";
+import { fetchJson } from "@/lib/fetch-json";
 
 const SUGGESTIONS = [
   "Which gates should we open for egress?",
@@ -16,14 +17,7 @@ export default function OpsChat({ liveState }: { liveState: string }) {
   const [exchanges, setExchanges] = useState<Array<{ q: string; a: string; fallback?: boolean }>>([]);
 
   const askMutation = useMutation({
-    mutationFn: async (text: string) => {
-      const res = await fetch("/api/ops", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "qa", question: text, liveState }),
-      });
-      return res.json() as Promise<{ answer: string; fallback?: boolean }>;
-    },
+    mutationFn: (text: string) => fetchJson<{ answer: string; fallback?: boolean }>("/api/ops", { action: "qa", question: text, liveState }),
     onSuccess: (data, text) => {
       setExchanges((e) => [{ q: text, a: data.answer, fallback: data.fallback }, ...e].slice(0, 4));
     },

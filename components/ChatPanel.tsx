@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { WORLD_CUP_LANGUAGES } from "@/lib/languages";
 import AiText from "@/components/AiText";
 import { speakText, getSpeechRecognitionCtor, describeSpeechError, type SpeechRecognitionLike } from "@/lib/speech";
+import { fetchJson } from "@/lib/fetch-json";
 
 interface Message {
   role: "user" | "assistant";
@@ -49,17 +50,12 @@ export default function ChatPanel({
   const chatMutation = useMutation({
     mutationFn: async ({ message, nextMessages }: { message: string; nextMessages: Message[] }) => {
       const langName = language === "auto" ? "auto" : WORLD_CUP_LANGUAGES.find((l) => l.code === language)?.name;
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message,
-          history: nextMessages.slice(-7, -1).map((m) => ({ role: m.role, text: m.text })),
-          language: langName,
-          simpleLanguage: simple,
-        }),
+      return fetchJson("/api/chat", {
+        message,
+        history: nextMessages.slice(-7, -1).map((m) => ({ role: m.role, text: m.text })),
+        language: langName,
+        simpleLanguage: simple,
       });
-      return res.json();
     },
     onSuccess: (data) => {
       setMessages((m) => [...m, { role: "assistant", text: data.reply, fallback: data.fallback }]);

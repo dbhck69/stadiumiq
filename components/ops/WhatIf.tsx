@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import type { SimState } from "@/lib/simulation";
 import AiText from "@/components/AiText";
+import { fetchJson } from "@/lib/fetch-json";
 
 interface ScenarioResult {
   label: string;
@@ -58,14 +59,11 @@ export default function WhatIf({ state }: { state: SimState }) {
   const [result, setResult] = useState<WhatIfResponse | null>(null);
 
   const whatIfMutation = useMutation({
-    mutationFn: async (text: string) => {
-      const res = await fetch("/api/whatif", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text, state }),
-      });
-      return res.json();
-    },
+    // Chains 2 sequential Gemini calls server-side (parse scenario, then narrate).
+    // retry: 0 for the same reason as the ops pipeline — a timeout means it's
+    // genuinely slow, and the example chips / input are right there to retry manually.
+    mutationFn: async (text: string) => fetchJson("/api/whatif", { question: text, state }, 25000),
+    retry: 0,
     onSuccess: (data) => setResult(data),
     // on error: keep result null; the retry button remains
   });
