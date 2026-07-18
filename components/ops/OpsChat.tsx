@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import AiText from "@/components/AiText";
 
 const SUGGESTIONS = [
   "Which gates should we open for egress?",
@@ -71,7 +72,7 @@ export default function OpsChat({ liveState }: { liveState: string }) {
         {exchanges.map((e, i) => (
           <motion.div key={`${e.q}-${i}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl bg-white/4 p-3">
             <div className="text-[11px] font-semibold text-electric">Q: {e.q}</div>
-            <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-white/80">{e.a}</p>
+            <p className="mt-1 text-xs leading-relaxed text-white/80"><AiText text={e.a} /></p>
             {e.fallback && <div className="mt-1 text-[10px] text-white/40">⚠ AI unreachable — telemetry fallback</div>}
           </motion.div>
         ))}

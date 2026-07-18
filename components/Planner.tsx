@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WORLD_CUP_LANGUAGES } from "@/lib/languages";
+import AiText from "@/components/AiText";
 
 interface Plan {
   gate: string;
@@ -140,16 +141,16 @@ export default function Planner() {
                     <span className="absolute -left-[31px] flex h-2.5 w-2.5 items-center justify-center rounded-full bg-pitch ring-4 ring-pitch/15" />
                     <div className="text-xs font-semibold text-pitch">{s.time}</div>
                     <div className="text-sm font-semibold">{s.title}</div>
-                    <div className="text-xs leading-relaxed text-white/55">{s.detail}</div>
+                    <div className="text-xs leading-relaxed text-white/55"><AiText text={s.detail} /></div>
                   </motion.li>
                 ))}
               </ol>
               <div className="mt-5 rounded-xl border border-pitch/25 bg-pitch/8 p-3.5 text-xs leading-relaxed text-white/75">
-                🌱 <span className="font-semibold text-pitch">Sustainability:</span> {plan.sustainabilityTip}
+                🌱 <span className="font-semibold text-pitch">Sustainability:</span> <AiText text={plan.sustainabilityTip} />
               </div>
               {plan.accessibilityNote && (
                 <div className="mt-2 rounded-xl border border-cyanx/25 bg-cyanx/8 p-3.5 text-xs leading-relaxed text-white/75">
-                  ♿ <span className="font-semibold text-cyanx">Accessibility:</span> {plan.accessibilityNote}
+                  ♿ <span className="font-semibold text-cyanx">Accessibility:</span> <AiText text={plan.accessibilityNote} />
                 </div>
               )}
             </motion.div>

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Nav from "@/components/Nav";
 import StadiumMap from "@/components/StadiumMap";
 import ChatPanel from "@/components/ChatPanel";
 import Planner from "@/components/Planner";
@@ -33,7 +32,6 @@ export default function FanPage() {
 
   return (
     <>
-      <Nav />
       <MatchTicker minute={sim.state.minute} attendance={sim.state.totalInside} />
       <main className="pitch-lines relative mx-auto w-full max-w-7xl flex-1 overflow-hidden px-4 py-6 sm:px-6">
         <div className="orb orb-b right-[-12%] top-[5%] h-[340px] w-[340px] bg-pitch/15" aria-hidden />
@@ -73,10 +71,10 @@ export default function FanPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25 }}
-              className="relative grid gap-4 lg:grid-cols-[1fr_420px]"
+              className="relative grid grid-cols-1 gap-4 lg:grid-cols-[1fr_420px]"
             >
               <ChatPanel onMapHighlight={setHighlight} injected={injected} />
-              <div className="glass h-fit rounded-2xl p-4">
+              <div className="glass h-fit min-w-0 rounded-2xl p-4">
                 <div className="mb-2 flex items-center justify-between px-1">
                   <span className="text-xs font-semibold tracking-widest text-white/70">STADIUM MAP</span>
                   <AnimatePresence>

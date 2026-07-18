@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import Nav from "@/components/Nav";
 import StadiumMap from "@/components/StadiumMap";
 import MatchTicker from "@/components/MatchTicker";
 import CountUp from "@/components/CountUp";
@@ -27,7 +26,6 @@ export default function Home() {
 
   return (
     <>
-      <Nav />
       <MatchTicker minute={sim.state.minute} attendance={sim.state.totalInside} />
       <main className="pitch-lines relative flex-1 overflow-hidden">
         {/* drifting aurora orbs */}

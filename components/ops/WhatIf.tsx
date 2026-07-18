@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { SimState } from "@/lib/simulation";
+import AiText from "@/components/AiText";
 
 interface ScenarioResult {
   label: string;
@@ -137,12 +138,12 @@ export default function WhatIf({ state }: { state: SimState }) {
               VERDICT: {result.narration.verdict.toUpperCase()}
               {result.fallback && <span className="ml-2 font-normal opacity-60">(AI narration offline — raw twin numbers)</span>}
             </div>
-            <div className="font-[family-name:var(--font-display)] text-lg font-bold text-white">{result.narration.headline}</div>
-            <p className="mt-2 text-sm leading-relaxed text-white/75">{result.narration.analysis}</p>
+            <div className="font-[family-name:var(--font-display)] text-lg font-bold text-white"><AiText text={result.narration.headline} /></div>
+            <p className="mt-2 text-sm leading-relaxed text-white/75"><AiText text={result.narration.analysis} /></p>
             {result.narration.mitigations.length > 0 && (
               <ul className="mt-3 space-y-1 text-sm text-white/85">
                 {result.narration.mitigations.map((m, i) => (
-                  <li key={i}>🛠 {m}</li>
+                  <li key={i}>🛠 <AiText text={m} /></li>
                 ))}
               </ul>
             )}

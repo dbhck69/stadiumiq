@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { WORLD_CUP_LANGUAGES, BROADCAST_DEFAULTS } from "@/lib/languages";
+import AiText from "@/components/AiText";
 
 interface Announcement {
   code: string;
@@ -49,7 +50,7 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
   function speak(a: Announcement) {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(a.text);
+    const u = new SpeechSynthesisUtterance(a.text.replace(/[*_#]/g, ""));
     u.lang = a.code;
     u.onend = () => setSpeakingCode(null);
     setSpeakingCode(a.code);
@@ -144,7 +145,7 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
                     </button>
                   </div>
                   <p dir={lang?.rtl ? "rtl" : "ltr"} className="text-xs leading-relaxed text-white/85">
-                    {a.text}
+                    <AiText text={a.text} />
                   </p>
                 </motion.div>
               );

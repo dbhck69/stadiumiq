@@ -10,12 +10,21 @@ const LINKS = [
   { href: "/ops", label: "Ops Command", short: "Ops", icon: "🎛️" },
 ];
 
+const HC_STORAGE_KEY = "stadiumiq_high_contrast";
+
 export default function Nav() {
   const pathname = usePathname();
   const [hc, setHc] = useState(false);
 
+  // Restore the saved preference once on mount (survives full page reloads,
+  // not just client-side navigation).
+  useEffect(() => {
+    if (localStorage.getItem(HC_STORAGE_KEY) === "1") setHc(true);
+  }, []);
+
   useEffect(() => {
     document.body.classList.toggle("hc", hc);
+    localStorage.setItem(HC_STORAGE_KEY, hc ? "1" : "0");
   }, [hc]);
 
   return (
@@ -51,10 +60,13 @@ export default function Nav() {
           <button
             onClick={() => setHc((v) => !v)}
             aria-pressed={hc}
-            title="Toggle high-contrast mode"
-            className="btn-press ml-0.5 shrink-0 rounded-full border border-white/15 px-2 py-1.5 text-[10px] text-white/65 transition hover:bg-white/10 hover:text-white sm:px-2.5 sm:text-xs"
+            aria-label="Toggle high-contrast, high-visibility mode for accessibility"
+            title="High-contrast mode — for low vision / bright sunlight"
+            className={`btn-press ml-0.5 shrink-0 rounded-full border px-2 py-1.5 text-[10px] transition sm:px-2.5 sm:text-xs ${
+              hc ? "border-pitch/60 bg-pitch/15 text-pitch" : "border-white/15 text-white/65 hover:bg-white/10 hover:text-white"
+            }`}
           >
-            HC
+            ◐ HC
           </button>
         </div>
       </div>

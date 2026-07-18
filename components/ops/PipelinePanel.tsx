@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/simulation";
+import AiText from "@/components/AiText";
 
 interface Triage {
   severity: "low" | "medium" | "high" | "critical";
@@ -142,10 +143,10 @@ export default function PipelinePanel({
                   <span className="text-white/60">{triage.category}</span>
                   {triage.escalate && <span className="rounded-full border border-danger/40 bg-danger/15 px-2.5 py-0.5 text-[11px] font-bold text-danger">⬆ ESCALATE</span>}
                 </div>
-                <p className="text-white/85">{triage.summary}</p>
+                <p className="text-white/85"><AiText text={triage.summary} /></p>
                 <ul className="space-y-1 text-xs text-white/55">
                   {triage.riskFactors.map((r, i) => (
-                    <li key={i}>⚠ {r}</li>
+                    <li key={i}>⚠ <AiText text={r} /></li>
                   ))}
                 </ul>
               </div>
@@ -171,14 +172,14 @@ export default function PipelinePanel({
                 {resource.allocations.map((a, i) => (
                   <div key={i} className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-xs">
                     <span className="font-semibold text-white/85">{a.unitId} × {a.count}</span>
-                    <span className="flex-1 px-3 text-white/60">{a.task}</span>
+                    <span className="flex-1 px-3 text-white/60"><AiText text={a.task} /></span>
                     <span className="text-cyanx">ETA {a.etaMinutes}m</span>
                   </div>
                 ))}
                 {resource.gateActions.length > 0 && (
                   <div className="text-xs text-warn">🚧 {resource.gateActions.join(" · ")}</div>
                 )}
-                <p className="text-xs italic text-white/45">{resource.rationale}</p>
+                <p className="text-xs italic text-white/45"><AiText text={resource.rationale} /></p>
               </div>
             )}
           </motion.div>
@@ -200,18 +201,18 @@ export default function PipelinePanel({
               <div className="space-y-2 text-sm">
                 <div className="rounded-lg bg-white/5 px-3 py-2">
                   <div className="text-[10px] font-bold text-white/40">STAFF RADIO</div>
-                  <div className="font-mono text-xs text-white/85">📻 {comms.staffRadioMessage}</div>
+                  <div className="font-mono text-xs text-white/85">📻 <AiText text={comms.staffRadioMessage} /></div>
                 </div>
                 {comms.publicAnnouncement && (
                   <div className="rounded-lg bg-white/5 px-3 py-2">
                     <div className="text-[10px] font-bold text-white/40">PUBLIC PA · tone: {comms.tone}</div>
-                    <div className="text-xs text-white/85">📢 {comms.publicAnnouncement}</div>
+                    <div className="text-xs text-white/85">📢 <AiText text={comms.publicAnnouncement} /></div>
                   </div>
                 )}
                 {comms.signageUpdate && (
                   <div className="rounded-lg bg-white/5 px-3 py-2">
                     <div className="text-[10px] font-bold text-white/40">CONCOURSE SIGNAGE</div>
-                    <div className="text-xs text-white/85">🖥 {comms.signageUpdate}</div>
+                    <div className="text-xs text-white/85">🖥 <AiText text={comms.signageUpdate} /></div>
                   </div>
                 )}
               </div>

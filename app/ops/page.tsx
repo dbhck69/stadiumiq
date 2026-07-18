@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Nav from "@/components/Nav";
 import StadiumMap from "@/components/StadiumMap";
 import MatchTicker from "@/components/MatchTicker";
 import StatTiles from "@/components/ops/StatTiles";
@@ -71,7 +70,6 @@ export default function OpsPage() {
 
   return (
     <>
-      <Nav />
       <MatchTicker minute={sim.state.minute} attendance={sim.state.totalInside} />
       <main className="pitch-lines relative mx-auto w-full max-w-7xl flex-1 overflow-hidden px-4 py-6 sm:px-6">
         <div className="orb orb-a left-[-12%] top-[10%] h-[360px] w-[360px] bg-electric/20" aria-hidden />
@@ -151,9 +149,9 @@ export default function OpsPage() {
             {tab === "live" && (
               <div className="space-y-4">
                 <StatTiles state={sim.state} />
-                <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_1fr]">
                   {/* Heatmap + gates */}
-                  <div className="space-y-4">
+                  <div className="min-w-0 space-y-4">
                     <div className="glass rounded-2xl p-4">
                       <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-1">
                         <span className="text-xs font-semibold tracking-widest text-white/70">SECTOR HEATMAP</span>
@@ -220,7 +218,7 @@ export default function OpsPage() {
                   </div>
 
                   {/* Incidents + pipeline */}
-                  <div className="space-y-4">
+                  <div className="min-w-0 space-y-4">
                     <IncidentFeed
                       incidents={sim.state.incidents}
                       selectedId={selected?.id ?? null}

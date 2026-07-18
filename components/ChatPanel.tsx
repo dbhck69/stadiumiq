@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WORLD_CUP_LANGUAGES } from "@/lib/languages";
+import AiText from "@/components/AiText";
 
 interface Message {
   role: "user" | "assistant";
@@ -131,7 +132,7 @@ export default function ChatPanel({
   const empty = messages.length === 0;
 
   return (
-    <div className="glass flex h-full min-h-[520px] flex-col rounded-2xl">
+    <div className="glass flex h-full min-h-[520px] min-w-0 flex-col rounded-2xl">
       {/* Assistant header */}
       <div className="flex items-center gap-3 border-b border-white/8 px-4 py-3">
         <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-pitch to-cyanx text-lg">
@@ -231,7 +232,7 @@ export default function ChatPanel({
                     : "rounded-bl-sm bg-white/8 text-white/90"
                 }`}
               >
-                {m.text}
+                <AiText text={m.text} />
                 {m.fallback && <div className="mt-1.5 text-[10px] opacity-60">⚠ offline answer from venue guide</div>}
               </div>
             </motion.div>
