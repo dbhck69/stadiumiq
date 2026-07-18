@@ -33,6 +33,8 @@ export default function OpsPage() {
   const pipelineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Syncing local tab state to the tour's external step data, not deriving it.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (tourActive && tourStep?.tab && tourStep.tab !== tab) setTab(tourStep.tab as Tab);
   }, [tourActive, tourStep, tab]);
 

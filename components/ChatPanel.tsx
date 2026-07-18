@@ -44,6 +44,9 @@ export default function ChatPanel({
   const lastInjectedId = useRef(0);
 
   useEffect(() => {
+    // Feature detection needs the browser's window/SpeechRecognition global,
+    // which isn't available during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSpeechSupported(Boolean(getSpeechRecognitionCtor()));
   }, []);
 

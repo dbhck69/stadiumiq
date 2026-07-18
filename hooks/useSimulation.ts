@@ -8,7 +8,10 @@ export function useSimulation(intervalMs = 3000) {
   const [state, setState] = useState<SimState>(() => initialState());
   const [running, setRunning] = useState(true);
   const runningRef = useRef(running);
-  runningRef.current = running;
+
+  useEffect(() => {
+    runningRef.current = running;
+  }, [running]);
 
   useEffect(() => {
     const id = setInterval(() => {

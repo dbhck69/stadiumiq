@@ -27,11 +27,11 @@ export default function MatchTicker({ minute, attendance }: { minute: number; at
     if (score > prevScore.current) {
       setFlash(true);
       const t = setTimeout(() => setFlash(false), 3800);
+      prevScore.current = score;
       return () => clearTimeout(t);
     }
     prevScore.current = score;
   }, [score]);
-  prevScore.current = score;
 
   return (
     <div className={`glass-strong border-x-0 border-t-0 ${flash ? "goal-flash" : ""}`} role="status" aria-label="Match score">

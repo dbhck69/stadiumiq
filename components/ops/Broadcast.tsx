@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { WORLD_CUP_LANGUAGES, BROADCAST_DEFAULTS } from "@/lib/languages";
@@ -21,9 +21,13 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
   const [fallback, setFallback] = useState(false);
   const [speakingCode, setSpeakingCode] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Adjust state during render instead of in an effect when a new prefill arrives
+  // (e.g. "Broadcast this incident" from the pipeline) — avoids an extra render pass.
+  const [lastPrefill, setLastPrefill] = useState(prefill);
+  if (prefill !== lastPrefill) {
+    setLastPrefill(prefill);
     if (prefill) setSituation(prefill);
-  }, [prefill]);
+  }
 
   function toggle(code: string) {
     setSelected((s) => (s.includes(code) ? s.filter((c) => c !== code) : [...s, code]));
@@ -63,7 +67,7 @@ export default function Broadcast({ prefill }: { prefill?: string }) {
       <div className="glass rounded-2xl p-5">
         <div className="mb-1 text-xs font-semibold tracking-widest text-gold">MULTILINGUAL EMERGENCY BROADCAST</div>
         <p className="mb-4 text-sm text-white/55">
-          One announcement, every fan's language — calm, panic-free phrasing composed by AI in a single pass, covering the languages of all 48 qualified nations.
+          {"One announcement, every fan's language — calm, panic-free phrasing composed by AI in a single pass, covering the languages of all 48 qualified nations."}
         </p>
         <label className="mb-1 block text-xs text-white/60" htmlFor="situation">Situation</label>
         <textarea

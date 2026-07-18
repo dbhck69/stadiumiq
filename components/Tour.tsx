@@ -39,7 +39,11 @@ export default function TourProvider({ children }: { children: React.ReactNode }
   const attemptRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => setMounted(true), []);
+  // Portals can only render after mount (no `document` on the server).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   const stop = useCallback(() => {
     setActive(false);
@@ -77,6 +81,7 @@ export default function TourProvider({ children }: { children: React.ReactNode }
 
   // A tour's steps are page-specific — close it if the user navigates away mid-tour.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
@@ -87,6 +92,7 @@ export default function TourProvider({ children }: { children: React.ReactNode }
     if (!active || !currentStep) return;
     // Never show the previous step's spotlight frozen in place while the new
     // target is still being located/animated in — hide until it's remeasured.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRect(null);
     attemptRef.current = 0;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

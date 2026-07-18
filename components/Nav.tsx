@@ -19,8 +19,11 @@ export default function Nav() {
   const { start: startTour, hasSteps: hasTour } = useTour();
 
   // Restore the saved preference once on mount (survives full page reloads,
-  // not just client-side navigation).
+  // not just client-side navigation). Reading localStorage isn't available
+  // during SSR, so this has to happen post-mount rather than in a lazy
+  // useState initializer (which would cause a hydration mismatch).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (localStorage.getItem(HC_STORAGE_KEY) === "1") setHc(true);
   }, []);
 
