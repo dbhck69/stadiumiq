@@ -24,6 +24,7 @@ export async function generateJson<T>(prompt: string): Promise<AiResult<T>> {
     const text = await generate(prompt, true);
     return { ok: true, data: parseJson<T>(text) };
   } catch (err) {
+    console.error("[ai] generateJson failed, falling back:", err);
     return { ok: false, error: err instanceof Error ? err.message : "AI request failed" };
   }
 }
@@ -34,6 +35,7 @@ export async function generateText(prompt: string): Promise<AiResult<string>> {
     const text = await generate(prompt, false);
     return { ok: true, data: text };
   } catch (err) {
+    console.error("[ai] generateText failed, falling back:", err);
     return { ok: false, error: err instanceof Error ? err.message : "AI request failed" };
   }
 }
