@@ -24,7 +24,7 @@ Stack: Next.js 16 · Google Gemini (JSON mode) · a seeded TypeScript crowd simu
 
 Biggest lesson: the strongest GenAI pattern isn't prompt → answer. It's **language model on the ends, deterministic engine in the middle** — AI translates human intent into parameters and computed results back into human judgment. That's what operations teams can actually trust.
 
-🔗 Live demo: [link]
-💻 Repo: [link]
+🔗 Live demo: https://stadiumiq-bice.vercel.app
+💻 Repo: https://github.com/dbhck69/stadiumiq
 
 #PromptWars #Hack2Skill #GenAI #Gemini #FIFAWorldCup2026 #SmartStadiums #AIAgents #DigitalTwin #BuildInPublic
